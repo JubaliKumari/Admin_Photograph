@@ -1,0 +1,54 @@
+src/
+├── api/                # All API calls (Axios, services)
+│   ├── axios.js
+│   ├── endpoints.js
+│   └── services/
+│       ├── authService.js
+│       └── userService.js
+│
+├── assets/             # Images, icons, logos
+│
+├── components/         # Reusable UI components
+│   ├── common/
+│   │   ├── Button.jsx
+│   │   ├── Input.jsx
+│   │   └── Loader.jsx
+│   │
+│   └── ui/
+│       ├── Modal.jsx
+│       └── Table.jsx
+│
+├── layouts/            # Page layouts
+│   ├── MainLayout.jsx
+│   └── AuthLayout.jsx
+│
+├── pages/              # Full pages (routes)
+│   ├── auth/
+│   │   ├── Login.jsx
+│   │   └── Register.jsx
+│   │
+│   ├── dashboard/
+│   │   ├── Dashboard.jsx
+│   │   └── UserList.jsx
+│   │
+│   └── NotFound.jsx
+│
+├── routes/             # Routing config
+│   └── AppRoutes.jsx
+│
+├── hooks/              # Custom hooks
+│   ├── useAuth.js
+│   └── useFetch.js
+│
+├── context/            # Global state (Auth, Theme)
+│   └── AuthContext.jsx
+│
+├── utils/              # Helper functions
+│   ├── formatDate.js
+│   └── constants.js
+│
+├── styles/             # Global styles
+│   └── index.css
+│
+├── App.jsx
+└── main.jsx
