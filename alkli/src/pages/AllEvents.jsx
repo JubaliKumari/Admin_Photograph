@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { MdAdd } from "react-icons/md";
+
+
 export default function AllEvents() {
   const [posts, setPosts] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
@@ -36,9 +39,9 @@ export default function AllEvents() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white p-6">
       {/* FORM */}
-      <div className="w-full max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+      <div className="w-full max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-2xl dark:bg-gray-500 text-gray-800 dark:text-white">
         <h2 className="text-3xl font-bold mb-6 text-center">
           Create Portfolio Post 📸
         </h2>
@@ -60,20 +63,54 @@ export default function AllEvents() {
             )}
           </div>
 
+          {/* Image */}
+                     {/* <label> Upload Photo
+                        <div className="h-32 border w-auto my-4 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden relative group">
+          
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            {...register("images", { required: "Images are required" })}
+                            onChange={handleImageChange}
+                            className="w-full"
+                          />
+                          {errors.image && (
+                            <p className="text-red-500">{errors.image.message}</p>
+                          )}
+                          {preview? (<>
+                                <img src={preview} alt="preview" className="w-full h-40 object-cover rounded" />
+                                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300" ><span className="flex justify-center items-center h-full font-bold text-5xl">
+                                  <MdAdd />
+                                </span></div>
+                              </>) : (
+                                <span className="flex justify-center items-center w-full h-full font-bold text-5xl">
+                                  <MdAdd />
+                                </span>
+                              )}
+                          </div>
+                      </label> */}
+
           {/* Images */}
           <div>
-            <label className="block mb-1 font-medium">Upload Images</label>
+            <label className="block mb-1 font-medium">Upload Images
+
+              <div className="size-32 my-2 border rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 hover:opacity-50  duration-300" >
+                <span className="flex justify-center items-center h-full font-bold text-5xl">
+                  <MdAdd />
+                </span>
+              </div>
+
+
             <input
               type="file"
               multiple
               accept="image/*"
               {...register("images", { required: "Images are required" })}
               onChange={handleImageChange}
-              className="w-full"
+              className="w-full hidden"
             />
-            {errors.images && (
-              <p className="text-red-500 text-sm">{errors.images.message}</p>
-            )}
+            </label>
           </div>
 
           {/* Preview */}
@@ -120,7 +157,7 @@ export default function AllEvents() {
       </div>
 
       {/* POSTS GRID */}
-      <div className="max-w-6xl mx-auto mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="max-w-6xl mx-auto mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6  ">
         {posts.length === 0 ? (
           <p className="text-center col-span-full text-gray-500">
             No posts yet 🚀
@@ -129,7 +166,7 @@ export default function AllEvents() {
           posts.map((post, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden"
+              className="bg-white rounded-2xl shadow hover:shadow-2xl transition dark:bg-gray-500  overflow-hidden"
             >
               {/* Image Grid */}
               <div className="grid grid-cols-2 gap-1">
@@ -146,7 +183,7 @@ export default function AllEvents() {
               {/* Content */}
               <div className="p-4">
                 <h3 className="text-lg font-bold">{post.heading}</h3>
-                <p className="text-gray-600 text-sm mt-1">{post.description}</p>
+                <p className="text-gray-600 dark:text-gray-100 text-sm mt-1">{post.description}</p>
               </div>
             </div>
           ))
