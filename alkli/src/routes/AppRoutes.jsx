@@ -7,6 +7,12 @@ import AddPostForm from "@/pages/AddPostForm";
 import ExploreWork from "@/pages/ExploreWork";
 import AboutMe from "@/pages/AboutMe";
 import AllEvents from "@/pages/AllEvents";
+import Products from "@/pages/Products";
+import Travelling from "@/pages/Travelling";
+import LifeStyle from "@/pages/LifeStyle";
+import Corparate from "@/pages/Corparate";
+import Portrait from "@/pages/Portrait";
+
 // import Login from "../pages/auth/Login";
 // import Dashboard from "../pages/dashboard/Dashboard";
 // import UserList from "../pages/dashboard/UserList";
@@ -25,6 +31,11 @@ export default function AppRoutes() {
           <Route path="/ExploreWork" element={<ExploreWork />} />
           <Route path="/AboutMe" element={<AboutMe />} />
           <Route path="/AllEvents" element={<AllEvents />} />
+          <Route path="/Products" element={<Products />} />
+          <Route path="/Travelling" element={<Travelling />} />
+          <Route path="/LifeStyle" element={<LifeStyle />} />
+          <Route path="/Corparate" element={<Corparate />} />
+          <Route path="/Portrait" element={<Portrait />} />
         </Route>
       </Routes>
     </BrowserRouter>

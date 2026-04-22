@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { MdAdd } from "react-icons/md";
-
+import { MdAdd, MdPhotoLibrary } from "react-icons/md";
+import { createEvent } from "../api/endpoints";
+import axios from "axios";
 
 export default function AllEvents() {
   const [posts, setPosts] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -15,178 +16,176 @@ export default function AllEvents() {
     formState: { errors },
   } = useForm();
 
-  // Handle image preview
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const previews = files.map((file) => URL.createObjectURL(file));
     setPreviewImages(previews);
   };
 
-  const onSubmit = (data) => {
-    const images = Array.from(data.images).map((file) =>
-      URL.createObjectURL(file),
-    );
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
 
-    const newPost = {
-      heading: data.heading,
-      description: data.description,
-      images,
-    };
+    const formData = new FormData();
+    formData.append("heading", data.heading);
+    console.log("Form Data Heading:", data.heading);
 
-    setPosts((prev) => [...prev, newPost]);
-    setPreviewImages([]);
-    reset();
+    // 🔥 Backend expects 'image' (singular)
+    if (data.images && data.images.length > 0) {
+      formData.append("image", data.images[0]); // ✅ singular
+    }
+    console.log("Form Data Images:", data.images);
+
+    try {
+      const response = await axios.post(createEvent, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        const serverData = response.data.data;
+
+        const newPost = {
+          heading: serverData.heading,
+          // Using local URL for immediate display
+          images: [URL.createObjectURL(data.images[0])],
+          _id: serverData._id,
+        };
+
+        setPosts((prev) => [newPost, ...prev]);
+        setPreviewImages([]);
+        reset();
+        alert("Event Created Successfully! 🎉");
+      }
+    } catch (error) {
+      console.error("API Error:", error.response?.data);
+      alert(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white p-6">
-      {/* FORM */}
-      <div className="w-full max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-2xl dark:bg-gray-500 text-gray-800 dark:text-white">
-        <h2 className="text-3xl font-bold mb-6 text-center">
-          Create Portfolio Post 📸
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white p-6">
+      {/* --- FORM SECTION --- */}
+      <div className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700">
+        <h2 className="text-3xl font-extrabold mb-8 text-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+          Create Portfolio Post
         </h2>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid md:grid-cols-2 gap-6"
-        >
-          {/* Heading */}
-          <div>
-            <label className="block mb-1 font-medium">Heading</label>
-            <input
-              type="text"
-              {...register("heading", { required: "Heading is required" })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            />
-            {errors.heading && (
-              <p className="text-red-500 text-sm">{errors.heading.message}</p>
-            )}
-          </div>
-
-          {/* Image */}
-                     {/* <label> Upload Photo
-                        <div className="h-32 border w-auto my-4 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 overflow-hidden relative group">
-          
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            {...register("images", { required: "Images are required" })}
-                            onChange={handleImageChange}
-                            className="w-full"
-                          />
-                          {errors.image && (
-                            <p className="text-red-500">{errors.image.message}</p>
-                          )}
-                          {preview? (<>
-                                <img src={preview} alt="preview" className="w-full h-40 object-cover rounded" />
-                                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-50 transition-opacity duration-300" ><span className="flex justify-center items-center h-full font-bold text-5xl">
-                                  <MdAdd />
-                                </span></div>
-                              </>) : (
-                                <span className="flex justify-center items-center w-full h-full font-bold text-5xl">
-                                  <MdAdd />
-                                </span>
-                              )}
-                          </div>
-                      </label> */}
-
-          {/* Images */}
-          <div>
-            <label className="block mb-1 font-medium">Upload Images
-
-              <div className="size-32 my-2 border rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 hover:opacity-50  duration-300" >
-                <span className="flex justify-center items-center h-full font-bold text-5xl">
-                  <MdAdd />
-                </span>
-              </div>
-
-
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              {...register("images", { required: "Images are required" })}
-              onChange={handleImageChange}
-              className="w-full hidden"
-            />
-            </label>
-          </div>
-
-          {/* Preview */}
-          {previewImages.length > 0 && (
-            <div className="md:col-span-2 grid grid-cols-3 gap-3">
-              {previewImages.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt="preview"
-                  className="h-24 w-full object-cover rounded-lg"
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  Post Heading
+                </label>
+                <input
+                  type="text"
+                  placeholder="E.g. Summer Wedding 2024"
+                  {...register("heading", { required: "Heading is required" })}
+                  className="w-full px-4 py-3 rounded-xl border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
                 />
-              ))}
+                {errors.heading && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.heading.message}
+                  </p>
+                )}
+              </div>
             </div>
-          )}
 
-          {/* Description */}
-          <div className="md:col-span-2">
-            <label className="block mb-1 font-medium">Description</label>
-            <textarea
-              {...register("description", {
-                required: "Description is required",
-              })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              rows="3"
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm">
-                {errors.description.message}
-              </p>
-            )}
+            <div className="flex flex-col">
+              <label className="text-sm font-semibold mb-2">
+                Gallery Images
+              </label>
+              <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition relative overflow-hidden group min-h-[150px]">
+                {previewImages.length > 0 ? (
+                  <div className="grid grid-cols-2 w-full h-full p-2 gap-1">
+                    {previewImages.slice(0, 4).map((img, i) => (
+                      <img
+                        key={i}
+                        src={img}
+                        className="w-full h-full object-cover rounded-md"
+                        alt="preview"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <MdPhotoLibrary className="text-5xl text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Click to upload photo
+                    </p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  {...register("images", {
+                    required: "Image is required",
+                    onChange: (e) => {
+                      handleImageChange(e); // preview
+                    },
+                  })}
+                />
+              </label>
+              {errors.images && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.images.message}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Button */}
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-3 rounded-lg text-lg hover:bg-blue-600 transition"
-            >
-              Add Post
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full py-4 rounded-xl font-bold text-lg transition ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95"
+            }`}
+          >
+            {isSubmitting ? "Publishing..." : "Publish Post"}
+          </button>
         </form>
       </div>
 
-      {/* POSTS GRID */}
-      <div className="max-w-6xl mx-auto mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6  ">
-        {posts.length === 0 ? (
-          <p className="text-center col-span-full text-gray-500">
-            No posts yet 🚀
-          </p>
-        ) : (
-          posts.map((post, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow hover:shadow-2xl transition dark:bg-gray-500  overflow-hidden"
-            >
-              {/* Image Grid */}
-              <div className="grid grid-cols-2 gap-1">
-                {post.images.slice(0, 4).map((img, i) => (
-                  <img
-                    key={i}
-                    src={img}
-                    alt="post"
-                    className="h-32 w-full object-cover"
-                  />
-                ))}
-              </div>
+      {/* --- POSTS DISPLAY GRID (Heading & Image Only) --- */}
+      <div className="max-w-7xl mx-auto mt-16 px-4">
+        <div className="flex items-center justify-between mb-8 border-b pb-4 border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold">Portfolio Gallery</h2>
+          <span className="text-gray-500 text-sm">{posts.length} Items</span>
+        </div>
 
-              {/* Content */}
-              <div className="p-4">
-                <h3 className="text-lg font-bold">{post.heading}</h3>
-                <p className="text-gray-600 dark:text-gray-100 text-sm mt-1">{post.description}</p>
-              </div>
-            </div>
-          ))
+        {posts.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-lg italic">No items yet 🚀</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post, index) => (
+              <article
+                key={index}
+                className="group bg-white dark:bg-gray-800 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700"
+              >
+                {/* Image Showcase */}
+                <div className="relative h-72 overflow-hidden">
+                  <img
+                    src={post.images[0]}
+                    alt={post.heading}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+
+                {/* Content: Heading Only */}
+                <div className="p-5 text-center">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
+                    {post.heading}
+                  </h3>
+                </div>
+              </article>
+            ))}
+          </div>
         )}
       </div>
     </div>
